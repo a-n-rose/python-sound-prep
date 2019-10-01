@@ -2,7 +2,28 @@
 
 These are a collection of functions that I use from time to time when working with sounds.
 
-## Jupyter
+## Installation
+
+Clone this repository. Establish your working directory where the files `requirements.txt` and `soundprep.py` are located.
+
+I would suggest setting up an environment:
+```
+$ python3 -m venv env
+$ source env/bin/activation
+(env)...$ 
+```
+Then install the dependencies:
+```
+(env)...$ pip install -r requirements.txt
+```
+I tend to just use ipython.. which you can easily install via pip:
+```
+(env)...$ pip install ipython
+(env)...$ ipython
+```
+From there you can use the functionality below, as documented.
+
+## Prepare Audio for Jupyter Lab
 
 I like working with sound in Jupyter notebooks. However, not all Python sound libraries work in that environment. But Scipy.io.wavfile works perfectly in Jupyter. 
 
@@ -38,7 +59,7 @@ Saved file as <filename>.wav
 
 In both of the above cases, new wavfiles are saved and can be used in a Jupyter notebook.
 
-## Combining sounds
+## Combining Sounds
 
 Often I like to explore sounds added with various other sounds, either for filtering or training or just for fun. I have also put together a couple of functions for such purposes.
 
@@ -95,4 +116,4 @@ The `match2shortest` parameter allows you to control whether the adding of the t
 
 The parameters `time_delay_sec` and `total_dur_sec` allows you to control at which point the shorter signal gets added to the longer one, and how long the longer signal plays. 
 
-For example, if the total duration of the long signal is 30 seconds and the shorter signal just 2 seconds, you can use the longer signal as a reference, but keep it shorter than 30 seconds... let's say 15 instead. Therefore, you would set `total_dur_sec` as 15. Let's also say that you would like the shorter signal to be added 8 seconds into the longer one; you can control that by setting `time_delay_sec` at 8.
+For example, if the total duration of the long signal is 30 seconds and the shorter signal just 2 seconds, you can use the longer signal as a reference, but keep it shorter than 30 seconds... let's say 15 instead. Therefore, you would set `total_dur_sec` as 15. Let's also say that you would like the shorter signal to be added 8 seconds into the longer one; you can control that by setting `time_delay_sec` to 8.
