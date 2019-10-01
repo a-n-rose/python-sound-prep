@@ -83,7 +83,6 @@ You listen to it again, and it's much better.
 Let's say you have two relevant signals: a short speech signal and a long music signal. You want the speech signal to occur at some point in the music signal. This functionality allows for a bit more flexility in that regard without repeating either of the signals (as done in the above example).
 
 ```
-def combine_sounds(file1, file2, match2shortest=True, time_delay_sec=1,total_dur_sec=5):
 >>> combined_samples, sr = sp.combine_sounds(
                                             'speech.wav', 
                                             'music.wav',
@@ -96,4 +95,4 @@ The `match2shortest` parameter allows you to control whether the adding of the t
 
 The parameters `time_delay_sec` and `total_dur_sec` allows you to control at which point the shorter signal gets added to the longer one, and how long the longer signal plays. 
 
-For example, if the total duration of the long signal is 30 seconds and the shorter signal just 2 seconds, you can use the longer signal as a reference, but keep it shorter than 30 seconds... let's say 15 instead. Therefore, you would set `total_dur_sec` as 15.
+For example, if the total duration of the long signal is 30 seconds and the shorter signal just 2 seconds, you can use the longer signal as a reference, but keep it shorter than 30 seconds... let's say 15 instead. Therefore, you would set `total_dur_sec` as 15. Let's also say that you would like the shorter signal to be added 8 seconds into the longer one; you can control that by setting `time_delay_sec` at 8.
