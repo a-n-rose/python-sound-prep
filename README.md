@@ -9,7 +9,7 @@ Clone this repository. Establish your working directory where the files `require
 I would suggest setting up an environment:
 ```
 $ python3 -m venv env
-$ source env/bin/activation
+$ source env/bin/activate
 (env)...$ 
 ```
 Then install the dependencies:
@@ -25,7 +25,7 @@ From there you can use the functionality below, as documented.
 
 ## Prepare Audio for Jupyter Lab
 
-I like working with sound in Jupyter notebooks. However, not all Python sound libraries work in that environment. But Scipy.io.wavfile works perfectly in Jupyter. 
+I like working with sound in Jupyter notebooks. However, not all Python sound libraries work in that environment. But Scipy.io.wavfile works perfectly. 
 
 I am working on a collection of functions that help me when I am experimenting with sound and want to use them in Jupyter. 
 
@@ -117,3 +117,11 @@ The `match2shortest` parameter allows you to control whether the adding of the t
 The parameters `time_delay_sec` and `total_dur_sec` allows you to control at which point the shorter signal gets added to the longer one, and how long the longer signal plays. 
 
 For example, if the total duration of the long signal is 30 seconds and the shorter signal just 2 seconds, you can use the longer signal as a reference, but keep it shorter than 30 seconds... let's say 15 instead. Therefore, you would set `total_dur_sec` as 15. Let's also say that you would like the shorter signal to be added 8 seconds into the longer one; you can control that by setting `time_delay_sec` to 8.
+
+## General functions
+
+There are more functions you can use and I suggest to just peak through the code if you're interested. For example, there is a function for making stereo sound data mono instead, or normalizing the samples between certain values. 
+
+## Feedback
+
+If you wish certain functionality were available, hit me up. I'm mainly curious but who knows, maybe I'd be able to set that up!
