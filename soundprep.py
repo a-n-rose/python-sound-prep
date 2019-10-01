@@ -1,4 +1,10 @@
-#A collection of functions handling sound data
+#Librosa and Soundfile are great Python libraries for analysing
+#and manipulating sound. However, they are not importable in 
+#Jupyter notebooks. These libraries may not work in for Jupyter
+#notebooks; however if one has a soundfile they would like to use 
+#in a Jupyter notebook, they can use these functions, which use
+#Librosa and soundfile, to prepare the soundfile(s) for use a 
+#Jupyter notebook with the scipy.io.wavfile module.
 
 from scipy.io.wavfile import read
 import soundfile as sf
@@ -7,12 +13,28 @@ import numpy as np
 
 
 def normsound(samples,min_val=-1,max_val=1):
+    '''Scales the input array to range between `min_val` and `max_val`
+    '''
     samples = np.interp(samples,(samples.min(), samples.max()),(min_val, max_val))
     return samples
 
-def loadsoundfile(filename, norm=True, mono=True):
+def loadsoundfile(filename, samplerate=None, norm=True, mono=True):
+    '''Loads sound file with scipy.io.wavfile.read
+    
+    If the sound file is not compatible with scipy's read module
+    this functions converts the file to .wav format and/or
+    changes the bit depth to be compatible. 
+    
+    Parameters
+    ----------
+    filename : str
+        The filename of the sound to be loaded
+    '''
     try:
         sr, data = read(filename)
+        if samplerate:
+            if sr != samplerate:
+                data, sr = resample_audio(data, sr_original = sr, sr_desired = samplerate)
     except ValueError:
         print("Ensuring {} filetype is compatible with scipy library".format(filename))
         filename = convert2wav(filename)
@@ -30,6 +52,18 @@ def loadsoundfile(filename, norm=True, mono=True):
     return data, sr
 
 def prep4scipywavfile(filename):
+    '''Takes soundfile and saves it in a format compatible with scipy.io.wavfile
+    
+    Parameters
+    ----------
+    filename : str
+        Filename of the soundfile to load with scipy.io.wavfile
+    
+    Returns
+    -------
+    filename : str
+        Filename of the soundfile compatible with scipy.io.wavfile
+    '''
     try:
         sr, data = read(filename)
         return filename
@@ -50,9 +84,7 @@ def prep4scipywavfile(filename):
     return filename
 
 def convert2wav(filename, samplerate=None):
-    '''Convert to .wav file type, to ensure compatibility with scipy.io.wavfile
-    
-    Scipy.io.wavfile is easily used online, for example in Jupyter notebooks.
+    '''Converts soundfile to .wav type 
     '''
     import pathlib
     f = pathlib.Path(filename)
@@ -70,12 +102,33 @@ def convert2wav(filename, samplerate=None):
     return f_wavfile
 
 def replace_ext(filename, extension):
+    '''Adds or replaces an extension in the filename
+    
+    Parameters
+    ----------
+    filename : str or pathlib.PosixPath
+        Filename with the missing or incorrect extension
+    extension : str
+        The correct extension for the given filename.
+    
+    Returns
+    -------
+    file_newext : str
+        The filename with the new extension
+    '''
+    if isinstance(filename, str):
+        import pathlib
+        filename = pathlib.Path(filename)
     filestring = str(filename)[:len(str(filename))-len(filename.suffix)]
+    if extension[0] != '.':
+        extension = '.'+extension
     file_newext = filestring + extension
     return file_newext
 
 def match_ext(filename1, filename2):
-    '''Matches the file extensions. If both have extensions, default set to `filename1` extension
+    '''Matches the file extensions. 
+    
+    If both have extensions, default set to that of `filename1`.
     '''
     import pathlib
     f1 = pathlib.Path(filename1)
@@ -134,6 +187,28 @@ def newbitdepth(wave, bitdepth=16, newname=None, overwrite=False):
     return savedname
 
 def adjustname(filename, adjustment=None):
+    '''Adjusts filename.
+    
+    Parameters
+    ----------
+    filename : str
+        The filename to be adjusted
+    adjustment : str, optional
+        The adjustment to add to the filename. If None, 
+        the string '_adj' will be added.
+    
+    Returns
+    -------
+    fname : str 
+        The adjusted filename with the original extension
+        
+    Examples
+    --------
+    >>> adjustname('happy.md')
+    'happy_adj.md'
+    >>> adjustname('happy.md', '_not_sad')
+    'happy_not_sad.md'
+    '''
     import pathlib
     f = pathlib.Path(filename)
     fname = f.stem
@@ -153,10 +228,39 @@ def resample_audio(samples, sr_original, sr_desired):
     return resampled, sr_desired
 
 def stereo2mono(data):
+    '''If sound data has multiple channels, reduces to first channel
+    
+    Parameters
+    ----------
+    data : numpy.ndarray
+        The series of sound samples, with 1+ columns/channels
+    
+    Returns
+    -------
+    data_mono : numpy.ndarray
+        The series of sound samples, with first column
+        
+    Examples
+    --------
+    >>> import numpy as np
+    >>> data = np.linspace(0,20)
+    >>> data_2channel = data.reshape(25,2)
+    >>> data_2channel[5]
+    array([[0.        , 0.40816327],
+       [0.81632653, 1.2244898 ],
+       [1.63265306, 2.04081633],
+       [2.44897959, 2.85714286],
+       [3.26530612, 3.67346939]])
+    >>> data_mono = stereo2mono(data)
+    >>> data_mono[:5]
+    array([0.        , 0.81632653, 1.63265306, 2.44897959, 3.26530612])
+    '''
     data_mono = np.take(data,0,axis=-1) 
     return data_mono
 
 def add_sound_to_signal(target_filename, sound2add_filename, scale=1, delay_target = 1):
+    '''Adds a sound (i.e. background noise) to a target signal 
+    '''
     target, sr = loadsoundfile(target_filename)
     sound2add, sr2 = loadsoundfile(sound2add_filename)
     if sr != sr2:
@@ -174,6 +278,11 @@ def add_sound_to_signal(target_filename, sound2add_filename, scale=1, delay_targ
     return combined, sr
 
 def extend_sound(data, target_len):
+    '''Extends a sound by repeating it until its `target_len`
+    
+    This is perhaps useful when working with repetitive or
+    stationary sounds.
+    '''
     diff = target_len - len(data)
     while len(data) < target_len:
         data = np.concatenate((data,data))
@@ -182,6 +291,28 @@ def extend_sound(data, target_len):
     return data
 
 def zeropad_sound(data, target_len, sr, delay_sec=1):
+    '''If the sound data needs to be a certain length, zero pad it.
+    
+    Parameters
+    ----------
+    data : numpy.ndarray
+        The sound data that needs zero padding. Shape (len(data),). 
+        Expects mono channel.
+    target_len : int 
+        The number of samples the `data` should have
+    sr : int
+        The samplerate of the `data`
+    delay_sec : int, float, optional
+        If the data should be zero padded also at the beginning.
+        (default 1)
+    
+    Returns
+    -------
+    signal_zeropadded : numpy.ndarray
+        The data zero padded to the shape (target_len,)
+    '''
+    if len(data.shape) > 1 and data.shape[1] > 1: 
+        data = stereo2mono(data)
     delay_samps = sr * delay_sec
     if len(data) < target_len:
         diff = target_len - len(data)
@@ -191,6 +322,31 @@ def zeropad_sound(data, target_len, sr, delay_sec=1):
     return signal_zeropadded
 
 def combine_sounds(file1, file2, match2shortest=True, time_delay_sec=1,total_dur_sec=5):
+    '''Combines sounds
+    
+    Parameters
+    ----------
+    file1 : str 
+        One of two files to be added together
+    file2 : str 
+        Second of two files to be added together
+    match2shortest : bool
+        If the lengths of the addition should be limited by the shorter sound. 
+        (defaul True)
+    time_delay_sec : int, float, optional
+        The amount of time in seconds before the sounds are added together. 
+        The longer sound will play for this period of time before the shorter
+        sound is added to it. (default 1)
+    total_dur_sec : int, float, optional
+        The total duration in seconds of the combined sounds. (default 5)
+        
+    Returns
+    -------
+    added_sound : numpy.ndarray
+        The sound samples of the two soundfiles added together
+    sr1 : int 
+        The sample rate of the original signals and added sound
+    '''
     data1, sr1 = loadsoundfile(file1)
     data2, sr2 = loadsoundfile(file2)
     if sr1 != sr2:
@@ -218,4 +374,3 @@ def combine_sounds(file1, file2, match2shortest=True, time_delay_sec=1,total_dur
     if total_dur_sec:
         added_sound = added_sound[:sr1*total_dur_sec]
     return added_sound, sr1
-
