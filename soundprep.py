@@ -36,14 +36,16 @@ def loadsoundfile(filename, samplerate=None, norm=True, mono=True):
             if sr != samplerate:
                 data, sr = resample_audio(data, sr_original = sr, sr_desired = samplerate)
     except ValueError:
-        print("Ensuring {} filetype is compatible with scipy library".format(filename))
+        print("Step 1: ensure filetype is compatible with scipy library".format(filename))
         filename = convert2wav(filename)
         try:
             data, sr = loadsoundfile(filename)
+            print("Success!")
         except ValueError:
-            print("Ensuring bitdepth is compatible with scipy library")
+            print("Step 2: ensure bitdepth is compatible with scipy library")
             filename = newbitdepth(filename)
             data, sr = loadsoundfile(filename)
+            print("Success!")
     if mono and len(data.shape) > 1:
         if data.shape[1] > 1:
             data = stereo2mono(data)
@@ -258,7 +260,7 @@ def stereo2mono(data):
     data_mono = np.take(data,0,axis=-1) 
     return data_mono
 
-def add_sound_to_signal(target_filename, sound2add_filename, scale=1, delay_target = 1):
+def add_sound_to_signal(target_filename, sound2add_filename, scale=1, delay_target_sec = 1):
     '''Adds a sound (i.e. background noise) to a target signal 
     '''
     target, sr = loadsoundfile(target_filename)
@@ -266,15 +268,15 @@ def add_sound_to_signal(target_filename, sound2add_filename, scale=1, delay_targ
     if sr != sr2:
         sound2add, sr = resample_audio(sound2add, sr2, sr)
     sound2add *= scale
-    firstsec = sound2add[:sr]
-    sound2add = sound2add[sr:]
+    beginning_delay = sound2add[:int(sr*delay_target_sec)]
+    sound2add = sound2add[int(sr*delay_target_sec):]
     if len(sound2add) < len(target):
         sound2add2 = extend_sound(sound2add, len(target))
     sound2add2 = sound2add[:len(target)]
     assert len(sound2add2) == len(target)
     combined = sound2add2 + target
-    if delay_target:
-        combined = np.concatenate((firstsec,combined))
+    if delay_target_sec:
+        combined = np.concatenate((beginning_delay,combined))
     return combined, sr
 
 def extend_sound(data, target_len):
