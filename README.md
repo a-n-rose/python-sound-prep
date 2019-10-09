@@ -1,6 +1,11 @@
 ## Sound Exploration
 
-These are a collection of functions that I use from time to time when working with sounds.
+These are a collection of functions that I use from time to time when working with sounds. They cover:
+
+* visualizations
+* preparation of sound for online environment (i.e. JupyterLab)
+* adding soundfiles together
+* etc. (no examples prepared)
 
 ## Installation
 
@@ -22,6 +27,49 @@ I tend to just use ipython.. which you can easily install via pip:
 (env)...$ ipython
 ```
 From there you can use the functionality below, as documented.
+
+
+## Visualizing sound
+
+We will visualize sound first as a sound wave, in the time domain, and then in the frequency domain (MFCC and FBANK features).
+
+```
+>>> import explore_sound as es
+>>> # first create a signal to visualize
+>>> samples, samplerate = es.create_signal(freq=5, dur_sec=1)
+>>> es.visualize_signal(samples, samplerate=samplerate)
+```
+![Imgur](https://i.imgur.com/uCV2pgN.png)
+
+#### Add noise:
+```
+>>> noise = es.create_noise(len(samples), amplitude=0.025)
+>>> samples_noisy = samples + noise
+>>> es.visualize_signal(samples_noisy, samplerate=samplerate)
+```
+![Imgur](https://i.imgur.com/pj2SiY4.png)
+
+#### Multiple frequencies: time domain
+```
+>>> samples500, samplerate = es.create_signal(freq=500, dur_sec=0.25)
+>>> samples1200, samplerate = es.create_signal(freq=1200, dur_sec=0.25)
+>>> samples2000, samplerate = es.create_signal(freq=2000, dur_sec=0.25)
+>>> samples_mixed = samples500 + samples1200 + samples2000
+>>> es.visualize_signal(samples_mixed, samplerate=samplerate)
+```
+![Imgur](https://i.imgur.com/LEfqQtO.png)
+
+#### Multiple frequencies: frequncy domain
+```
+>>> es.visualize_feats(samples_mixed, samplerate=samplerate, features='mfcc', save_pic=True)
+```
+![Imgur](https://i.imgur.com/GeZJiBX.png)
+
+```
+>>> es.visualize_feats(samples_mixed, samplerate=samplerate, features='fbank', save_pic=True)
+```
+![Imgur](https://i.imgur.com/ivJ9fBG.png)
+
 
 ## Prepare Audio for Jupyter Lab
 
@@ -58,6 +106,7 @@ Saved file as <filename>.wav
 ```
 
 In both of the above cases, new wavfiles are saved and can be used in a Jupyter notebook.
+
 
 ## Combining Sounds
 
